@@ -1,12 +1,38 @@
-# serverless-artillery [![Build Status](https://travis-ci.org/Nordstrom/serverless-artillery.svg)](https://travis-ci.org/Nordstrom/serverless-artillery) [![Coverage Status](https://coveralls.io/repos/github/Nordstrom/serverless-artillery/badge.svg?branch=master)](https://coveralls.io/github/Nordstrom/serverless-artillery?branch=master)
-Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `serverless-artillery`) for instant, cheap, and easy performance testing at scale.
+# serverless-artillery [![Build Status](https://travis-ci.org/Nordstrom/serverless-artillery.svg?branch=master)](https://travis-ci.org/Nordstrom/serverless-artillery) [![Coverage Status](https://coveralls.io/repos/github/Nordstrom/serverless-artillery/badge.svg?branch=master)](https://coveralls.io/github/Nordstrom/serverless-artillery?branch=master)
 
-We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
+[//]: # (Thanks to https://www.divio.com/en/blog/documentation/)
 
-If you would like a more detailed walk through of motivations, setup, and usage, please consider taking a look at the workshop that was initially presented at the Serverless Conference, London 2016: https://github.com/Nordstrom/serverless-artillery-workshop. Load testing an ApiGateway endpoint?  You may want to use the [artillery-plugin-aws-sigv4](https://github.com/Nordstrom/artillery-plugin-aws-sigv4).  Want to record your results in InfluxDb?  You may want to use [artillery-plugin-influxdb](https://github.com/Nordstrom/artillery-plugin-influxdb).  Want to record your results without setting up a database? You may want to use [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch).
+Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`) for instant, cheap, and easy system validation at scale.
+
+TL;DR:
+From a single test script and without deploying or maintaining any servers or infrastructure, you get:
+* Performance Mode: measure system behavior under load, instantaneously and to arbitrarily large levels of load
+* Acceptance Mode: validate your CI/CD deployment with synthetic traffic and fail or gate the build in cases of error
+* Monitoring Mode: regularly validate system behavior and health with small bursts of synthetic traffic
+
+1. [Installation](#installation)
+1. [Quick Start & Finish](#quick-start--finish)
+1. Understand `serverless-artillery`
+   1. [So what is it?](#so-what-is-it)
+   1. [Missing Pieces](#missing-pieces)
+   1. [Generalization](#generalization)
+1. [In-Depth Tutorial](https://github.com/Nordstrom/serverless-artillery-workshop)
+1. How to use `serverless-artillery`
+   1. [Script Customization](#script-customization)
+      1. [Performance Mode](#performance-mode)
+      1. [Acceptance Mode](#acceptance-mode)
+      1. [Monitoring Mode](#monitoring-mode)
+   1. [Function Customization](#function-customization)
+1. [Command Reference](#detailed-usage)
+1. [External References](#external-references)
+
+## There's a workshop for that
+
+We've created a complete workshop detailing end-to-end usage of serverless-artillery.  Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.  If you're not in the mood for a workshop, or just want the facts, read on!
 
 ## Installation
-We assume you have node.js (v4 or better) installed.  Likewise you should have the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
+
+Requires node.js (v4 or better) installed and the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
 
 ```
 npm install -g serverless-artillery
@@ -15,29 +41,29 @@ npm install -g serverless-artillery
 ## Quick Start & Finish
 
 ```
-$ slsart deploy   // and then
-$ slsart invoke   // repeat as desired, before...
-$ slsart remove
+$ slsart deploy   // deploys serverless artillery with a sample script pointed at the aws website with low load
+$ slsart invoke   // runs serverless-artillery, generating load and responding in the CLI (because the load is small)
+$ slsart remove   // removes all artifacts from your account, will also shut-down artillery if it's in progress
 ```
 
 ### Deeper Dive
 
 ```
-$ slsart deploy                  // If not already deployed.
+$ slsart deploy                  // if not already deployed
 
 // create a custom test against your service with a 10 second duration and 3 RPS:
-$ slsart script -e https://your.endpoint.com -d 10 -r 3
+$ slsart script -e https://example.com -d 10 -r 3
 
 // run acceptance tests
-$ slsart invoke -a               // iterate on editing `./script.yml` and invoking as desired, before...
+$ slsart invoke -a               // runs the script you created above in acceptance mode
 
 // run performance tests
-$ slsart invoke
+$ slsart invoke                  // runs the same script you created in performance mode
 
-$ slsart remove
+$ slsart remove                  // removes all artifacts
 ```
 
-Note that you may need to define `AWS_PROFILE` to declare the AWS credentials to use and perhaps `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal.
+Depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal.
 
 ### More advanced use cases
 
@@ -390,3 +416,9 @@ We expect to retro-fit this project with the serverless-star project as its firs
 2. [serverless.com](https://docs.serverless.com/framework/docs/) for documentation about how to create a custom function configuration
 3. [serverless-artillery](https://github.com/Nordstrom/serverless-artillery) README for documentation on the use of this tool
 4. [serverless-star](https://github.com/Nordstrom/serverless-star) Next generation implementation and generalization of the arbitrarily wide work distribution capability
+
+## Background and looking forward
+
+We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
+
+With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
