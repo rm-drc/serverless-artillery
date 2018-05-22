@@ -26,17 +26,17 @@ From a single test script and without deploying or maintaining any servers or in
 1. [Command Reference](#detailed-usage)
 1. [External References](#external-references)
 
-## There's a workshop for that
+### There's a workshop for that
 
 We've created a complete workshop detailing end-to-end usage of serverless-artillery.  Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.  If you're not in the mood for a workshop, or just want the facts, read on!
 
-## Related helpful/necessary tools and plugins
+### Related helpful/necessary tools and plugins
 
 * [artillery-plugin-aws-sigv4](https://github.com/Nordstrom/artillery-plugin-aws-sigv4) for testing against an authenticated AWS API Gateway endpoint
 * [artillery-plugin-influxdb](https://github.com/Nordstrom/artillery-plugin-influxdb) to record test results to InfluxDB
 * [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch
 
-## Installation
+### Installation
 
 Requires node.js (v4 or better) installed and the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
 
@@ -44,7 +44,7 @@ Requires node.js (v4 or better) installed and the serverless framework (v1.0+) e
 npm install -g serverless-artillery
 ```
 
-## Quick(est) start
+### Quick(est) start
 
 ```
 $ slsart deploy   // deploys serverless artillery with a simple sample script
