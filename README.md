@@ -47,9 +47,9 @@ npm install -g serverless-artillery
 ## Quick(est) start
 
 ```
-$ slsart deploy   // deploys serverless artillery with a sample script pointed at the aws website with low load
-$ slsart invoke   // runs serverless-artillery, generating load and responding in the CLI (because the load is small)
-$ slsart remove   // removes all artifacts from your account, will also shut-down artillery if it's in progress
+$ slsart deploy   // deploys serverless artillery with a simple sample script
+$ slsart invoke   // runs serverless-artillery using this sample script
+$ slsart remove   // halts serverless-artillery and removes all artifacts from your account
 ```
 
 ### A slightly deeper dive
