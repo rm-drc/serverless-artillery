@@ -44,7 +44,7 @@ Requires node.js (v4 or better) installed and the serverless framework (v1.0+) e
 npm install -g serverless-artillery
 ```
 
-## Quick Start & Finish
+## Quick(est) start
 
 ```
 $ slsart deploy   // deploys serverless artillery with a sample script pointed at the aws website with low load
@@ -52,7 +52,7 @@ $ slsart invoke   // runs serverless-artillery, generating load and responding i
 $ slsart remove   // removes all artifacts from your account, will also shut-down artillery if it's in progress
 ```
 
-### Deeper Dive
+### A slightly deeper dive
 
 ```
 $ slsart deploy                  // if not already deployed
@@ -71,17 +71,19 @@ $ slsart remove                  // removes all artifacts
 
 Depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal.
 
-### More advanced use cases
+### Common use cases
 
-Use arbitrary script files
+Use your own test script files:
 
 `$ slsart -p /my/path/to/my.other.script.yml`
 
-Generate a customizable script on the CLI (hit `https://your.endpoint.com` with `10` requests per second, scaling up to `25` requests per second over `60` seconds)
+You can quickly generate a customizable test script from the command line.  In this example, you want to create a test script that will hit `https://example.com` with `10` requests per second, scaling up to `25` requests per second over `60` seconds:
 
-`$ slsart script -e https://your.endpoint.com -d 60 -r 10 -t 25`
+`$ slsart script -e https://example.com -d 60 -r 10 -t 25`
 
-Generate a local copy of the function that can be edited and redeployed with your changed settings.  This enables more advanced configurations of the function to send [load against VPC hosted services](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration), [use CSV files to specify variables in your URLs](https://artillery.io/docs/script-reference.html#Payloads) (hint: put your `csv` in the same directory as your `serverless.yml` and redeploy), or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for function configuration related documentation.  See https://artillery.io/docs for script configuration related documentation.
+### Advanced customization use cases
+
+If you want to make even more customizations to how serverless-artillery works, you can generate a local copy of the serverless function code that can be edited and redeployed with your changed settings.  This enables more advanced configurations of the function to send [load against VPC hosted services](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration), [use CSV files to specify variables in your URLs](https://artillery.io/docs/script-reference.html#Payloads) (hint: put your `csv` in the same directory as your `serverless.yml` and redeploy), or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for function configuration related documentation.  See https://artillery.io/docs for script configuration related documentation.
 
 ```
 $ slsart configure
@@ -89,7 +91,7 @@ $ nano serverless.yml
 $ nano handler.js
 ```
 
-## Detailed Usage
+## Detailed Usage Documentation
 
 ```
 $ slsart --help
@@ -401,7 +403,19 @@ Next, we take chunks from the script by maximum load.  This is driven by the max
 
 Anyway...  The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
 
-## Generalization
+## References
+1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
+2. [serverless.com](https://docs.serverless.com/framework/docs/) for documentation about how to create a custom function configuration
+3. [serverless-artillery](https://github.com/Nordstrom/serverless-artillery) README for documentation on the use of this tool
+4. [serverless-star](https://github.com/Nordstrom/serverless-star) Next generation implementation and generalization of the arbitrarily wide work distribution capability
+
+## Background and motivation
+
+We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
+
+With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
+
+## The future of serverless-artillery
 
 Wait.  There's a general pattern here of distributed load execution!
 
@@ -417,14 +431,6 @@ Watch for that effort here: https://github.com/Nordstrom/serverless-star
 
 We expect to retro-fit this project with the serverless-star project as its first use case and proof-of-not-a-painful-waste-of-our-time-ness™.
 
-## References
-1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
-2. [serverless.com](https://docs.serverless.com/framework/docs/) for documentation about how to create a custom function configuration
-3. [serverless-artillery](https://github.com/Nordstrom/serverless-artillery) README for documentation on the use of this tool
-4. [serverless-star](https://github.com/Nordstrom/serverless-star) Next generation implementation and generalization of the arbitrarily wide work distribution capability
+## If you've read this far
 
-## Background and looking forward
-
-We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
-
-With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
+We're happy to buy you a drink at any conference we both attend.  Hit us up!
