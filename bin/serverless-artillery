@@ -145,6 +145,7 @@ const yargs = require('yargs')
       }
     } // eslint-disable-line comma-dangle
   )
+  .command('kill', 'kill running lambda', {})
   .command('remove', 'Remove the function and the associated resources created for or by it.  See ' +
     'https://serverless.com/framework/docs/providers/aws/cli-reference/remove/ for reference.', {})
   .command(
@@ -206,6 +207,7 @@ const yargs = require('yargs')
       },
     } // eslint-disable-line comma-dangle
   )
+  .command('kill', 'Kill a test from an invoked lambda ', {})
   .demand(1)
 
 const command = yargs.argv._[0]

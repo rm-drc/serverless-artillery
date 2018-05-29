@@ -48,6 +48,16 @@ class ServerlessFake {
     this.pluginManager = {
       plugins: [new AwsInvoke()],
     }
+    this.variables = {
+      populateService: () => BbPromise.resolve(),
+    }
+    this.service = {
+      setFunctionNames: () => {},
+      functions: { loadGenerator: { name: 'a-fake-name' } },
+    }
+    this.processedInput = {
+      options: {},
+    }
   }
   init() { return slsFakeInit(this) }
   run() { return Promise.resolve(this).then((that) => { that.pluginManager.plugins[0].log({ Payload }) }) }
@@ -1048,6 +1058,39 @@ scenarios:
               }) // eslint-disable-line comma-dangle
           ) // eslint-disable-line comma-dangle
         )
+      })
+    })
+
+    describe('#kill', () => {
+      let awsStub
+      let removeStub
+      beforeEach(() => {
+        awsStub = sinon.stub(aws.Service.prototype, 'makeRequest')
+        removeStub = sinon.stub(slsart, 'remove')
+      })
+      afterEach(() => {
+        awsStub.restore()
+        removeStub.restore()
+      })
+      it.only('remove happens after function concurrency being set to zero', () => {
+        const afterStub = sinon.stub().returns(BbPromise.resolve())
+        awsStub.returns({
+          promise: () => BbPromise.delay(100).then(afterStub),
+        })
+        removeStub.returns(BbPromise.resolve())
+        return slsart.kill({}).should.be.fulfilled
+          .then(() => {
+            afterStub.should.have.been.calledBefore(removeStub)
+          })
+      })
+
+      it('fail when function does not exist', () => {
+        awsStub.returns({
+          promise: () => BbPromise.delay(100)
+            .then(() => BbPromise.reject({
+              code: 'ResourceNotFoundException',
+            })),
+        })
       })
     })
 
